@@ -1,5 +1,7 @@
 'use strict'
 
+import { createSudoku, createPlayable } from "./boardMaker.js";
+
 // Selectores
 const board = document.getElementById('board');
 const controls = document.getElementById('controls');
@@ -9,29 +11,15 @@ const mode = document.getElementById('mode');
 // Create globals
 const boardHTML = Array.from({ length: 9 }, () => new Array(9).fill('')); // New way to create the matrix
 const controlsHTML = new Array(9).fill(''); // Array for buttons
+const modes = {
+  "Easy": 30,
+  "Medium": 40,
+  "Hard": 60
+}
+
+let boardSolution = createSudoku();
+let boardPlayable = createPlayable(structuredClone(boardSolution), modes['Medium']);
 let selectedCell = null; // null for no selection, otherwise target
-const boardEasy = [
-  "--74916-5",
-  "2---6-3-9",
-  "-----7-1-",
-  "-586----4",
-  "--3----9-",
-  "--62--187",
-  "9-4-7---2",
-  "67-83----",
-  "81--45---"
-].map(row => row.split(''));
-const solutionEasy = [
-  "387491625",
-  "241568379",
-  "569327418",
-  "758619234",
-  "123784596",
-  "496253187",
-  "934176852",
-  "675832941",
-  "812945763"
-].map(row => row.split(''));
 
 // Create cells
 const createBoard = () => {
@@ -45,12 +33,10 @@ const createBoard = () => {
       cellDiv.id = `${i}-${j}`;
       if (i == 3 || i == 6) cellDiv.style.borderTop = '2px solid black';
       if (j == 3 || j == 6) cellDiv.style.borderLeft = '2px solid black';
-      // Add first map
-      const valueCell = boardEasy[i][j] === '-' ? '' : boardEasy[i][j];
-      cellDiv.textContent = valueCell;
+      cellDiv.innerText = boardPlayable[i][j];
       // listeners
-      cellDiv.tabIndex = 0; // tabIndex allows to select the HTMLElement
-      if (valueCell == '') addListenersToCell(cellDiv);
+      cellDiv.innerText !== '' ? '' : cellDiv.tabIndex = 0; // tabIndex allows to select the HTMLElement
+      addListenersToCell(cellDiv);
       board.appendChild(cellDiv);
       boardHTML[i][j] = cellDiv;
     });
@@ -72,9 +58,6 @@ const addListenersToCell = (cell) => {
     selectedCell = null;
   })
 }
-
-
-
 
 // // highlight rows and cols of the selected Cell (internal function)
 const selectedCellRowCol = (x, y, color='') => {
@@ -109,12 +92,13 @@ const numberButtonsListeners = (button) => {
         selectedCell.innerText = '';
       } else {
         selectedCell.innerText = e.target.value;
-        if (check(selectedCell)) {
-          selectedCell.style.color = 'green';
-          selectedCell.removeAttribute('tabIndex')
-        } else {
-          selectedCell.style.color = 'red';
-        }
+      }
+      // check the play
+      if (checkPlay()) {
+        selectedCell.style.color = 'green';
+        selectedCell.removeAttribute('tabindex');
+      } else {
+        selectedCell.style.color = 'red';
       }
     });
     // Prevent the button from taking focus away from the cell
@@ -123,10 +107,9 @@ const numberButtonsListeners = (button) => {
     });
 }
 
-// check
-const check = (cell) => {
-  let [row, col] = cell.id.split('-');
-  if (cell.innerText == solutionEasy[row][col]) {
+const checkPlay = () => {
+  let [row, col] = selectedCell.id.split('-');
+  if (selectedCell.innerText == boardSolution[row][col]) {
     return true;
   } else {
     return false;
@@ -140,9 +123,35 @@ const createModeButtons = () => {
     let difficulty = i == 0 ? 'Easy' : i == 1 ? 'Medium' : 'Hard';
     modeButton.innerText = difficulty;
     modeButton.classList.add('mode-button');
-    modeButton.id = `mode-button-${difficulty}`;
+    modeButton.id = `mode-${difficulty}`;
     mode.appendChild(modeButton);
   }
+  modeButtonsListeners();
+}
+
+// // internal function
+const modeButtonsListeners = () => {
+  const modeButtons = document.getElementsByClassName('mode-button');
+  for (const button of modeButtons) {
+    button.addEventListener('click', (e) => {
+      let difficulty = e.target.id.split('-')[1];
+      boardSolution = createSudoku();
+      boardPlayable = createPlayable(structuredClone(boardSolution), modes[difficulty]);
+      newBoard();
+    });
+  }
+}
+
+// // internal function
+const newBoard = () => {
+  boardHTML.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      cell.removeAttribute('tabindex');
+      cell.style.color = '';
+      cell.innerText = boardPlayable[i][j];
+      cell.innerText !== '' ? '' : cell.tabIndex = 0;
+    });
+  });
 }
 
 // Reset Button
@@ -166,8 +175,12 @@ const createButtons = () => {
   createResetButton();
 }
 
-
 window.onload = () => {
   createBoard();
   createButtons();
 }
+window.createSudoku = createSudoku;
+window.boardSolution = boardSolution;
+window.boardPlayable = boardPlayable;
+window.boardHTML = boardHTML;
+window.selectedCell = selectedCell;
