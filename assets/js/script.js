@@ -155,6 +155,8 @@ const newBoard = () => {
 }
 
 // Reset Button
+// crear una funcion interna que cuando reinicie el juego limpie el tablero pero que no elimine 
+// los numeros fijos que ya habia puesto de manera aleatoria
 const createResetButton = () => {
   let resetButton = document.createElement('button');
   resetButton.innerText = 'Reset';
