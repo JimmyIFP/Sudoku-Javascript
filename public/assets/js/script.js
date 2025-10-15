@@ -153,8 +153,12 @@ const createResetButton = () => {
   reset.appendChild(resetButton);
   resetButton.addEventListener('click', () => {
     boardHTML.forEach((row, i) => {
-      row.forEach((cell, j) => {
-        cell.innerText = '';
+      row.forEach((_, j) => {
+        boardHTML[i][j].innerText = '';
+        boardHTML[i][j].style.color = '';
+        boardHTML[i][j].tabIndex = 0;
+        const valueCell = boardEasy[i][j] === '-' ? '' : boardEasy[i][j];
+        boardHTML[i][j].textContent = valueCell;
       });
     });
   });
