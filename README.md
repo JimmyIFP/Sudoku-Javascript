@@ -1,45 +1,65 @@
 # Sudoku con JavaScript Vanilla
 
-Un sencillo juego de Sudoku interactivo construido puramente con HTML, CSS y JavaScript, sin necesidad de librerías o frameworks externos.
+Un juego de Sudoku interactivo y dinámico construido con JavaScript moderno (ES6+), HTML y CSS, sin necesidad de librerías o frameworks externos.
 
 ## Descripción
 
-Este proyecto es una implementación de un tablero de Sudoku de 9x9. El objetivo principal era practicar la manipulación del DOM, la gestión de eventos y la lógica de programación en JavaScript. El tablero se genera dinámicamente y permite al usuario interactuar con las celdas para introducir números.
+Este proyecto implementa un juego de Sudoku de 9x9 completamente funcional. El objetivo era construir una aplicación web modular y bien estructurada, separando la lógica del juego, el manejo de datos y la interfaz de usuario.
+
+La aplicación carga puzles de forma asíncrona y genera el tablero y los controles dinámicamente. El usuario puede cambiar la dificultad, recibir validación instantánea de sus respuestas y reiniciar el tablero en cualquier momento.
 
 ## Características
 
-Tablero Dinámico: El tablero de 9x9 se genera completamente con JavaScript.
-División por Cuadrantes: Las celdas están visualmente agrupadas en sus cuadrantes de 3x3 correspondientes.
-Selección de Celda: Haz clic en una celda para seleccionarla. La celda activa se resalta para una mejor visibilidad.
-Resaltado de Fila y Columna: Al seleccionar una celda, toda su fila y columna se resaltan para ayudar a identificar conflictos.
-Controles de Números: Utiliza los botones numéricos para introducir o borrar un número en la celda seleccionada.
-Accesibilidad Básica: Se puede navegar por las celdas utilizando la tecla Tab gracias al uso del atributo tabindex.
+* **Tablero Dinámico:** El tablero de 9x9 y todos los controles se generan completamente con JavaScript.
+* **Niveles de Dificultad:** Elige entre los modos "Fácil", "Medio" y "Difícil" para cargar un nuevo puzle.
+* **Validación en Tiempo Real:** Los números introducidos se validan contra la solución al instante (verde si es correcto, rojo si es incorrecto).
+* **Selección de Celda Avanzada:** Al seleccionar una celda, toda su fila y columna se resaltan para ayudar a resolver el puzle.
+* **Controles Numéricos:** Un panel de botones permite introducir y borrar números en la celda seleccionada.
+* **Botón de Reinicio:** Un botón "Reset" permite limpiar el tablero y volver a empezar el puzle actual.
+* **Arquitectura Modular (ES6):** El código está organizado en módulos para una mejor separación de responsabilidades y mantenibilidad.
 
 ## Estructura del Proyecto
 
 ```plaintext
 .
 ├── index.html
-└── assets/
-    ├── css/
-    │   └── style.css
-    └── js/
-        └── script.js
+├── README.md
+├── public/
+│   └── assets/
+│       ├── css/
+│       │   └── style.css
+│       └── js/
+│           ├── game.js       # Script principal que inicializa el juego
+│           └── script.js
+└── src/
+    ├── controllers/
+    │   └── puzzleController.js # Lógica para obtener los puzles
+    ├── data/
+    │   └── puzzle.json         # Almacén de los puzles y soluciones
+    ├── services/
+    │   └── dataService.js      # Servicio para cargar datos del JSON
+    └── ui/
+        ├── board.js          # Módulo para crear y gestionar el tablero
+        └── controlls.js      # Módulo para crear y gestionar los controles
 ```
 
 ## Tecnologías Utilizadas
 
-* HTML5: Para la estructura semántica del contenido.
-* CSS3: Para el diseño y la apariencia visual del tablero.
-* JavaScript (ES6+): Para toda la lógica interactiva del juego.
+* **HTML5:** Para la estructura semántica del contenido.
+* **CSS3:** Para el diseño y la apariencia visual.
+* **JavaScript (ES6+):** Para toda la lógica del juego, utilizando módulos (`import`/`export`) y funciones asíncronas (`async`/`await`).
+
+## Cómo Jugar
+
+Simplemente abre el archivo `index.html` en tu navegador web.
 
 ## 💡 Aprendizajes Clave
 
-Durante el desarrollo de este proyecto, he reforzado y aprendido varios conceptos importantes de JavaScript y el desarrollo web:
+Durante el desarrollo de este proyecto, se reforzaron y aprendieron varios conceptos importantes:
 
+* **Arquitectura Modular:** La refactorización del código a un sistema de módulos (UI, controladores, servicios) fue clave para desacoplar la aplicación. Esto demuestra la importancia de la **Separación de Responsabilidades**, donde cada archivo tiene un único propósito, haciendo el código más limpio, mantenible y escalable.
 * **Gestión Compleja de Eventos:**
   * Los elementos no interactivos como `<div>` no reciben eventos `focus` o `blur` a menos que se les añada el atributo `tabindex`.
-  * Cómo el evento `mousedown` y `event.preventDefault()` son cruciales para evitar que un elemento (como un botón) "robe" el foco de otro (la celda seleccionada), solucionando problemas de interacción complejos.
-* **Manejo de Estado:** La importancia de usar una variable global (`selectedCell`) para mantener el estado de la aplicación (saber qué celda está activa en todo momento) y cómo esto simplifica la lógica en los listeners.
-* **Refactorización de Lógica:** Pasar de una larga cadena de `if-else` a una fórmula matemática (`(quadrantRow * 3) + quadrantCol + 1`) para determinar el cuadrante. Esto no solo reduce el código, sino que lo hace más legible y mantenible.
-* **Separación de Responsabilidades (CSS vs. JS):** Identificar oportunidades para mover lógica de estilo (como los bordes gruesos) de JavaScript a CSS para un código más limpio y declarativo.
+  * Cómo el evento `mousedown` y `event.preventDefault()` son cruciales para evitar que un elemento (como un botón) "robe" el foco de otro (la celda seleccionada).
+* **Manejo de Estado:** La importancia de usar una variable (`selectedCell`) para mantener el estado de la celda activa, simplificando la lógica en los listeners.
+* **Manipulación Asíncrona del DOM:** Cargar datos de un JSON de forma asíncrona y luego generar dinámicamente el tablero y los controles una vez que los datos están disponibles.
