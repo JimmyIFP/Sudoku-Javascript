@@ -1,5 +1,7 @@
 'use strict'
 
+import { getPuzzle } from "../../../src/controllers/puzzleController.js";
+
 // Selectores
 const board = document.getElementById('board');
 const controls = document.getElementById('controls');
@@ -10,43 +12,21 @@ const mode = document.getElementById('mode');
 const boardHTML = Array.from({ length: 9 }, () => new Array(9).fill('')); // New way to create the matrix
 const controlsHTML = new Array(9).fill(''); // Array for buttons
 let selectedCell = null; // null for no selection, otherwise target
-const boardEasy = [
-  "--74916-5",
-  "2---6-3-9",
-  "-----7-1-",
-  "-586----4",
-  "--3----9-",
-  "--62--187",
-  "9-4-7---2",
-  "67-83----",
-  "81--45---"
-].map(row => row.split(''));
-const solutionEasy = [
-  "387491625",
-  "241568379",
-  "569327418",
-  "758619234",
-  "123784596",
-  "496253187",
-  "934176852",
-  "675832941",
-  "812945763"
-].map(row => row.split(''));
+let boardTable;
+let solution;
 
 // Create cells
 const createBoard = () => {
   boardHTML.forEach((row, i) => {
     row.forEach((_, j) => {
       let cellDiv = document.createElement('div');
-      // Calculate quadrant
-      const quadrantNumber = (Math.floor(i / 3) * 3) + Math.floor(j / 3) + 1;
       // Add clases and id
-      cellDiv.classList.add('cell', `quadrant-${quadrantNumber}`);
+      cellDiv.classList.add('cell');
       cellDiv.id = `${i}-${j}`;
       if (i == 3 || i == 6) cellDiv.style.borderTop = '2px solid black';
       if (j == 3 || j == 6) cellDiv.style.borderLeft = '2px solid black';
       // Add first map
-      const valueCell = boardEasy[i][j] === '-' ? '' : boardEasy[i][j];
+      const valueCell = boardTable[i][j] === '-' ? '' : boardTable[i][j];
       cellDiv.textContent = valueCell;
       // listeners
       cellDiv.tabIndex = 0; // tabIndex allows to select the HTMLElement
@@ -72,9 +52,6 @@ const addListenersToCell = (cell) => {
     selectedCell = null;
   })
 }
-
-
-
 
 // // highlight rows and cols of the selected Cell (internal function)
 const selectedCellRowCol = (x, y, color='') => {
@@ -126,7 +103,7 @@ const numberButtonsListeners = (button) => {
 // check
 const check = (cell) => {
   let [row, col] = cell.id.split('-');
-  if (cell.innerText == solutionEasy[row][col]) {
+  if (cell.innerText == solution[row][col]) {
     return true;
   } else {
     return false;
@@ -139,8 +116,10 @@ const createModeButtons = () => {
     let modeButton = document.createElement('button');
     let difficulty = i == 0 ? 'Easy' : i == 1 ? 'Medium' : 'Hard';
     modeButton.innerText = difficulty;
+    modeButton.dataset.difficulty = difficulty.toLowerCase();
     modeButton.classList.add('mode-button');
     modeButton.id = `mode-button-${difficulty}`;
+    modeButton.addEventListener('click', changeDificulty)
     mode.appendChild(modeButton);
   }
 }
@@ -157,7 +136,7 @@ const createResetButton = () => {
         boardHTML[i][j].innerText = '';
         boardHTML[i][j].style.color = '';
         boardHTML[i][j].tabIndex = 0;
-        const valueCell = boardEasy[i][j] === '-' ? '' : boardEasy[i][j];
+        const valueCell = boardTable[i][j] === '-' ? '' : boardTable[i][j];
         boardHTML[i][j].textContent = valueCell;
       });
     });
@@ -170,8 +149,49 @@ const createButtons = () => {
   createResetButton();
 }
 
-
-window.onload = () => {
+// Init the first view
+const init = async () => {
+  const getBoard = await getPuzzle('easy');
+  boardTable = getBoard.puzzle.map(row => row.split(''));
+  solution = getBoard.solution.map(row => row.split(''));
   createBoard();
   createButtons();
 }
+
+// Change difficulty
+const changeDificulty = async (e) => {
+  const getBoard = await getPuzzle(e.target.dataset.difficulty);
+  boardTable = getBoard.puzzle.map(row => row.split(''));
+  solution = getBoard.solution.map(row => row.split(''));
+  cleanBoard();
+  printNewPuzzle(boardTable);
+}
+
+const cleanBoard = () => {
+  boardHTML.forEach((row, i) => {
+    row.forEach((_, j) => {
+      boardHTML[i][j].innerText = '';
+      boardHTML[i][j].style.color = '';
+      boardHTML[i][j].setAttribute('tabIndex', 0);
+      boardHTML[i][j].textContent = '';
+    });
+  });
+}
+
+const printNewPuzzle = (boardTable) => {
+  boardTable.forEach((row, i) => {
+    row.forEach((_, j) => {
+      const valueCell = boardTable[i][j] === '-' ? '' : boardTable[i][j];
+      boardHTML[i][j].textContent = valueCell;
+      boardHTML[i][j].tabIndex = 0;
+      if (valueCell.textContent == '') addListenersToCell(boardHTML[i][j]);
+    })
+  })
+}
+
+window.onload = () => {
+  init();
+}
+
+window.getPuzzle = getPuzzle;
+
